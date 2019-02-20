@@ -58,12 +58,11 @@ func GenerateServerCertificates() {
 	ca := &x509.Certificate{
 		SerialNumber: big.NewInt(1653),
 		Subject: pkix.Name{
-			Organization:  []string{"ORGANISATION_NAME"},
-			Country:       []string{"COUNTRY_CODE"},
-			Province:      []string{"PROVINCE"},
-			Locality:      []string{"CITY"},
-			StreetAddress: []string{"ADDRESS"},
-			PostalCode:    []string{"POSTAL_CODE"},
+			Organization:       []string{"BAE Systems"},
+			OrganizationalUnit: []string{"Applied Intelligence"},
+			Country:            []string{"UK"},
+			Province:           []string{"London"},
+			CommonName:         "localhost",
 		},
 		NotBefore:             time.Now(),
 		NotAfter:              time.Now().AddDate(10, 0, 0),
@@ -85,13 +84,13 @@ func GenerateServerCertificates() {
 	certOut, err := os.Create("root.crt")
 	pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: ca_b})
 	certOut.Close()
-	log.Println("written cert.pem")
+	log.Println("generated root certificate")
 
 	//private key
 	keyOut, err := os.OpenFile("root.key", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	pem.Encode(keyOut, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(priv)})
 	keyOut.Close()
-	log.Println("written key.pem")
+	log.Println("generated root key")
 }
 
 func GenerateClientCertificate(certDetails *pkix.Name) (string, string) {
@@ -111,7 +110,7 @@ func GenerateClientCertificate(certDetails *pkix.Name) (string, string) {
 		SerialNumber:          big.NewInt(1653),
 		Subject:               *certDetails,
 		NotBefore:             time.Now(),
-		NotAfter:              time.Now().AddDate(10, 0, 0),
+		NotAfter:              time.Now().AddDate(0, 0, 7),
 		SubjectKeyId:          []byte{1, 2, 3, 4, 6},
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
 		KeyUsage:              x509.KeyUsageDigitalSignature,
@@ -130,7 +129,8 @@ func GenerateClientCertificate(certDetails *pkix.Name) (string, string) {
 	certOut.Close()
 
 	//private key
-	keyOut, err := os.OpenFile("cert.key", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	keyOut, err := os.Open
+	File("cert.key", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	pem.Encode(keyOut, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(priv)})
 	keyOut.Close()
 
