@@ -48,11 +48,12 @@ func certProvider(w http.ResponseWriter, r *http.Request) {
 				"Certificate": cert,
 				"Key":         key,
 			}
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
 		}
 	}
 	body, _ := json.Marshal(data)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 	w.Write(body)
 }
 
