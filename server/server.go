@@ -27,25 +27,16 @@ func main() {
 	server.Listen(":8080")
 }
 
-type response struct {
-	Certificate string
-	Key         string
-}
-
 func certProvider(w http.ResponseWriter, r *http.Request) {
-	requesterDetails := &pkix.Name{
-		Organization:  []string{"ORGANISATION_NAME"},
-		Country:       []string{"COUNTRY_CODE"},
-		Province:      []string{"PROVINCE"},
-		Locality:      []string{"CITY"},
-		StreetAddress: []string{"ADDRESS"},
-		PostalCode:    []string{"POSTAL_CODE"},
-	}
-	cert, key := GenerateClientCertificate(requesterDetails)
 
-	data := response{
-		Certificate: cert,
-		Key:         key,
+	var requesterDetails pkix.Name
+	json.NewDecoder(r.Body).Decode(&requesterDetails)
+
+	cert, key := GenerateClientCertificate(&requesterDetails)
+
+	data := map[string]interface{}{
+		"Certificate": cert,
+		"Key":         key,
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
@@ -104,7 +95,6 @@ func GenerateServerCertificates() {
 }
 
 func GenerateClientCertificate(certDetails *pkix.Name) (string, string) {
-
 	// load CA
 	catls, err := tls.LoadX509KeyPair("root.crt", "root.key")
 	if err != nil {
@@ -115,6 +105,7 @@ func GenerateClientCertificate(certDetails *pkix.Name) (string, string) {
 		panic(err)
 	}
 
+	log.Println("Creating certificate for", (certDetails.Organization))
 	//Prepare certificate
 	cert := &x509.Certificate{
 		SerialNumber:          big.NewInt(1653),
@@ -137,13 +128,11 @@ func GenerateClientCertificate(certDetails *pkix.Name) (string, string) {
 	certOut, err := os.Create("cert.crt")
 	pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: cert_b})
 	certOut.Close()
-	log.Print("written cert.pem")
 
 	//private key
 	keyOut, err := os.OpenFile("cert.key", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	pem.Encode(keyOut, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(priv)})
 	keyOut.Close()
-	log.Println("written key.pem")
 
 	return readFile("cert.crt"), readFile("cert.key")
 }
