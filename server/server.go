@@ -29,20 +29,30 @@ func main() {
 
 func certProvider(w http.ResponseWriter, r *http.Request) {
 
-	var requesterDetails pkix.Name
-	json.NewDecoder(r.Body).Decode(&requesterDetails)
+	var data map[string]interface{}
+	switch r.Method {
+	case "GET":
+		{
+			data = map[string]interface{}{
+				"Certificate": readFile("root.crt"),
+			}
+		}
+	case "POST":
+		{
+			var requesterDetails pkix.Name
+			json.NewDecoder(r.Body).Decode(&requesterDetails)
 
-	cert, key := GenerateClientCertificate(&requesterDetails)
+			cert, key := GenerateClientCertificate(&requesterDetails)
 
-	data := map[string]interface{}{
-		"Certificate": cert,
-		"Key":         key,
+			data = map[string]interface{}{
+				"Certificate": cert,
+				"Key":         key,
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusCreated)
+		}
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	// json.NewEncoder(w).Encode(data)
 	body, _ := json.Marshal(data)
-
 	w.Write(body)
 }
 
@@ -129,8 +139,7 @@ func GenerateClientCertificate(certDetails *pkix.Name) (string, string) {
 	certOut.Close()
 
 	//private key
-	keyOut, err := os.Open
-	File("cert.key", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	keyOut, err := os.OpenFile("cert.key", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	pem.Encode(keyOut, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(priv)})
 	keyOut.Close()
 
