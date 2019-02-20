@@ -16,11 +16,11 @@ func main() {
 	client := mtlsClient.NewUnsecureClient()
 
 	requesterDetails := map[string]interface{}{
-		"Organization":     []string{"BAE Systems"},
-		"OrganizationUnit": []string{"Applied Intelligence"},
-		"Country":          []string{"UK"},
-		"Province":         []string{"London"},
-		"CommonName":       "localhost",
+		"Organization":       []string{"BAE Systems"},
+		"OrganizationalUnit": []string{"Applied Intelligence"},
+		"Country":            []string{"UK"},
+		"Province":           []string{"London"},
+		"CommonName":         "localhost",
 	}
 
 	buf := new(bytes.Buffer)
