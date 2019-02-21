@@ -24,7 +24,9 @@ func main() {
 	CheckServerCertificates()
 
 	server := mtlsServer.NewUnsecureServer()
-	server.Listen(":8080")
+	if err := server.Listen(":8080"); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func certProvider(w http.ResponseWriter, r *http.Request) {
