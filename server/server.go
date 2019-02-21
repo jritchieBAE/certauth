@@ -35,6 +35,7 @@ func certProvider(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		{
+			log.Println("root cert requested")
 			data = map[string]interface{}{
 				"Certificate": readFile("root.crt"),
 			}
