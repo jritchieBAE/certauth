@@ -15,18 +15,14 @@ import (
 func main() {
 	client := mtlsClient.NewUnsecureClient()
 
-	requesterDetails := map[string]interface{}{
-		"Organization":       []string{"BAE Systems"},
-		"OrganizationalUnit": []string{"Applied Intelligence"},
-		"Country":            []string{"UK"},
-		"Province":           []string{"London"},
-		"CommonName":         "localhost",
-	}
+	server := (GetConfigDetails("config.json"))["Server"].(string)
+
+	requesterDetails := GetConfigDetails("request.json")
 
 	buf := new(bytes.Buffer)
 	json.NewEncoder(buf).Encode(requesterDetails)
 
-	req, err := http.NewRequest("POST", "http://localhost:8080", buf)
+	req, err := http.NewRequest("POST", server, buf)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -64,4 +60,21 @@ func main() {
 	if err != nil {
 		log.Println(err)
 	}
+}
+
+func GetConfigDetails(p string) map[string]interface{} {
+	bytes := readBytes(p)
+	var result map[string]interface{}
+	json.Unmarshal(bytes, &result)
+	return result
+}
+
+func readBytes(fPath string) []byte {
+	f, err := os.Open(fPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+	byteValue, _ := ioutil.ReadAll(f)
+	return byteValue
 }
